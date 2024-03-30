@@ -17,6 +17,14 @@
 			<div class="content">
 				<canvas id="canvas"></canvas>
 				<div class="ui-controls">
+					<label>Angle randomness</label>
+					<input type="range" min="0" max="45" value="0" id="randVinkel" oninput="this.nextElementSibling.value = this.value" />
+					<output>0</output>
+					<br />
+					<label>Face</label>
+					<input type="range" min="1" max="6" value="1" id="face" oninput="this.nextElementSibling.value = this.value" />
+					<output>1</output>
+					<br />
 					<span id="score-result"></span>
 					<button id="roll-btn">Throw the dice</button>
 				</div>

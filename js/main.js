@@ -6,18 +6,20 @@ import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js'
 const canvasEl = document.querySelector('#canvas');
 const scoreResult = document.querySelector('#score-result');
 const rollBtn = document.querySelector('#roll-btn');
-
+let sliderElement = document.getElementById('randVinkel')
+let faceElement = document.getElementById('face')
 let renderer, scene, camera, diceMesh, physicsWorld;
 let results = {}
 const params = {
-    numberOfDice: 2000,
+    numberOfDice: 200,
     segments: 40,
     edgeRadius: .07,
     notchRadius: .12,
     notchDepth: .1,
 };
 let rowSize = 15
-
+let degrees = 0
+let selectedFace = 1
 const diceArray = [];
 
 initPhysics();
@@ -26,6 +28,18 @@ initScene();
 window.addEventListener('resize', updateSceneSize);
 window.addEventListener('dblclick', throwDice);
 rollBtn.addEventListener('click', throwDice);
+
+// change the degress of randomness
+sliderElement.addEventListener('change', () =>{
+    let val = sliderElement.value
+    degrees = val
+})
+
+// change the face
+faceElement.addEventListener('change', () => {
+    let val = faceElement.value
+    selectedFace = val
+})
 
 function initScene() {
 
@@ -307,11 +321,27 @@ function updateSceneSize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+
 function throwDice() {
-    scoreResult.innerHTML = '';
     results = {}
-    let degrees = 10
     let dR = degrees/180*3.14159265
+    let rX = 0
+    let rY = 0
+    if(selectedFace == 4){
+        rX = 3.14159/2
+    }
+    else if (selectedFace == 6){
+        rX = 3.14159
+    }
+    else if (selectedFace == 3){
+        rX = -3.14159/2
+    }
+    else if (selectedFace == 2){
+        rY = 3.14159/2
+    }
+    else if (selectedFace == 5){
+        rY = -3.14159/2
+    }
     diceArray.forEach((d, dIdx) => {
         d.body.velocity.setZero();
         d.body.angularVelocity.setZero();
@@ -320,7 +350,7 @@ function throwDice() {
         d.body.position = new CANNON.Vec3(column, 5, -row);
         d.mesh.position.copy(d.body.position);
 
-        d.mesh.rotation.set(dR*Math.random(),dR*Math.random(),dR*Math.random())
+        d.mesh.rotation.set(rX + dR*Math.random(), dR*Math.random(), rY +dR*Math.random())
         d.body.quaternion.copy(d.mesh.quaternion);
 
         d.body.applyImpulse(
