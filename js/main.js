@@ -8,14 +8,15 @@ const scoreResult = document.querySelector('#score-result');
 const rollBtn = document.querySelector('#roll-btn');
 
 let renderer, scene, camera, diceMesh, physicsWorld;
-
+let results = {}
 const params = {
-    numberOfDice: 10,
+    numberOfDice: 2000,
     segments: 40,
     edgeRadius: .07,
     notchRadius: .12,
     notchDepth: .1,
 };
+let rowSize = 15
 
 const diceArray = [];
 
@@ -39,7 +40,7 @@ function initScene() {
     scene = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, .1, 300)
-    camera.position.set(0, .2, 4).multiplyScalar(7);
+    camera.position.set(2, .3, 3.4).multiplyScalar(7);
 
     updateSceneSize();
 
@@ -121,7 +122,7 @@ function createDice() {
     scene.add(mesh);
 
     const body = new CANNON.Body({
-        mass: 1,
+        mass: 0.0041,
         shape: new CANNON.Box(new CANNON.Vec3(0.5, .5, .5)),
         sleepTimeLimit: .1
     });
@@ -269,11 +270,23 @@ function addDiceEvents(dice) {
 }
 
 function showRollResults(score) {
-    if (scoreResult.innerHTML === '') {
-        scoreResult.innerHTML += score;
-    } else {
-        scoreResult.innerHTML += ('+' + score);
+    if(results[score] == null){
+        results[score] = 1
     }
+    else {
+    results[score] = results[score]+1
+    }
+    let str = ""
+    let entries = Object.entries(results)
+    let sum = 0
+    for(let i = 0; i < entries.length; i++){
+        sum += entries[i][1]
+    }
+    for(let i = 0; i < entries.length; i++){
+        str += `${entries[i][0]}: ${entries[i][1]} dvs. ${(100*entries[i][1]/sum).toFixed(1)}% \n`
+    }
+    scoreResult.innerText = str;
+    
 }
 
 function render() {
@@ -294,22 +307,21 @@ function updateSceneSize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-function rand(min, max) {
-    return Math.floor( (Math.random() * max)) + min
-}
-
 function throwDice() {
     scoreResult.innerHTML = '';
-
+    results = {}
+    let degrees = 10
+    let dR = degrees/180*3.14159265
     diceArray.forEach((d, dIdx) => {
-
         d.body.velocity.setZero();
         d.body.angularVelocity.setZero();
-        d.body.position = new CANNON.Vec3(0+1.3*dIdx, 5, 0);
+        let column = 2 * (dIdx % rowSize)
+        let row = 2 * Math.floor(dIdx/rowSize)
+        d.body.position = new CANNON.Vec3(column, 5, -row);
         d.mesh.position.copy(d.body.position);
 
-        //d.mesh.rotation.set(2 * Math.PI * Math.random(), 0, 2 * Math.PI * Math.random())
-        //d.body.quaternion.copy(d.mesh.quaternion);
+        d.mesh.rotation.set(dR*Math.random(),dR*Math.random(),dR*Math.random())
+        d.body.quaternion.copy(d.mesh.quaternion);
 
         d.body.applyImpulse(
             new CANNON.Vec3(0, 0, 0)
