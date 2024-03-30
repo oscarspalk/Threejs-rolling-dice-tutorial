@@ -10,7 +10,7 @@ const rollBtn = document.querySelector('#roll-btn');
 let renderer, scene, camera, diceMesh, physicsWorld;
 
 const params = {
-    numberOfDice: 2,
+    numberOfDice: 10,
     segments: 40,
     edgeRadius: .07,
     notchRadius: .12,
@@ -34,12 +34,12 @@ function initScene() {
         canvas: canvasEl
     });
     renderer.shadowMap.enabled = true
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 
     scene = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, .1, 300)
-    camera.position.set(0, .5, 4).multiplyScalar(7);
+    camera.position.set(0, .2, 4).multiplyScalar(7);
 
     updateSceneSize();
 
@@ -69,11 +69,11 @@ function initScene() {
 function initPhysics() {
     physicsWorld = new CANNON.World({
         allowSleep: true,
-        gravity: new CANNON.Vec3(0, -50, 0),
+        gravity: new CANNON.Vec3(0, -9.82, 0),
     })
     physicsWorld.defaultContactMaterial.restitution = .3;
 }
-
+    
 
 function createFloor() {
     const floor = new THREE.Mesh(
@@ -122,7 +122,7 @@ function createDice() {
 
     const body = new CANNON.Body({
         mass: 1,
-        shape: new CANNON.Box(new CANNON.Vec3(.5, .5, .5)),
+        shape: new CANNON.Box(new CANNON.Vec3(0.5, .5, .5)),
         sleepTimeLimit: .1
     });
     physicsWorld.addBody(body);
@@ -294,6 +294,10 @@ function updateSceneSize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+function rand(min, max) {
+    return Math.floor( (Math.random() * max)) + min
+}
+
 function throwDice() {
     scoreResult.innerHTML = '';
 
@@ -301,17 +305,14 @@ function throwDice() {
 
         d.body.velocity.setZero();
         d.body.angularVelocity.setZero();
-
-        d.body.position = new CANNON.Vec3(6, dIdx * 1.5, 0);
+        d.body.position = new CANNON.Vec3(0+1.3*dIdx, 5, 0);
         d.mesh.position.copy(d.body.position);
 
-        d.mesh.rotation.set(2 * Math.PI * Math.random(), 0, 2 * Math.PI * Math.random())
-        d.body.quaternion.copy(d.mesh.quaternion);
+        //d.mesh.rotation.set(2 * Math.PI * Math.random(), 0, 2 * Math.PI * Math.random())
+        //d.body.quaternion.copy(d.mesh.quaternion);
 
-        const force = 3 + 5 * Math.random();
         d.body.applyImpulse(
-            new CANNON.Vec3(-force, force, 0),
-            new CANNON.Vec3(0, 0, .2)
+            new CANNON.Vec3(0, 0, 0)
         );
 
         d.body.allowSleep = true;
