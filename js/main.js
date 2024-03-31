@@ -11,7 +11,7 @@ let faceElement = document.getElementById('face')
 let renderer, scene, camera, diceMesh, physicsWorld;
 let results = {}
 const params = {
-    numberOfDice: 200,
+    numberOfDice: 300,
     segments: 40,
     edgeRadius: .07,
     notchRadius: .12,
@@ -86,6 +86,8 @@ function initPhysics() {
         allowSleep: true,
         gravity: new CANNON.Vec3(0, -9.82, 0),
     })
+    physicsWorld.quatNormalizeFast = true;
+
     physicsWorld.defaultContactMaterial.restitution = .3;
 }
     
